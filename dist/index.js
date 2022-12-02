@@ -328,7 +328,6 @@ const labels_1 = __nccwpck_require__(579);
  * @param state Status state
  */
 function processNonPendingStatus(repo, commit, context, state) {
-    var _a, _b, _c, _d, _e, _f;
     return __awaiter(this, void 0, void 0, function* () {
         const { repository: { branchProtectionRules, labels: { nodes: labelNodes }, }, } = yield fetchData(repo.owner.login, repo.name);
         const mergingLabel = labelNodes.find(labels_1.isBotMergingLabel);
@@ -342,9 +341,6 @@ function processNonPendingStatus(repo, commit, context, state) {
         core.info("commit: " + commit);
         core.info("checkSuites: " + latestCommit.checkSuites);
         console.log(latestCommit.checkSuites);
-        console.log((_a = latestCommit === null || latestCommit === void 0 ? void 0 : latestCommit.checkSuites) === null || _a === void 0 ? void 0 : _a.edges);
-        console.log((_c = (_b = latestCommit === null || latestCommit === void 0 ? void 0 : latestCommit.checkSuites) === null || _b === void 0 ? void 0 : _b.edges) === null || _c === void 0 ? void 0 : _c.node.status);
-        console.log((_f = (_e = (_d = latestCommit === null || latestCommit === void 0 ? void 0 : latestCommit.checkSuites) === null || _d === void 0 ? void 0 : _d.edges) === null || _e === void 0 ? void 0 : _e.node) === null || _f === void 0 ? void 0 : _f.status);
         // if (commit.node_id !== latestCommit.id) {
         //   // Commit that trigger this hook is not the latest commit of the merging PR
         //   return
@@ -356,8 +352,8 @@ function processNonPendingStatus(repo, commit, context, state) {
         }
         const requiredCheckNames = baseBranchRule.requiredStatusCheckContexts;
         if (state === "success") {
-            const isAllRequiredCheckPassed = latestCommit.checkSuites.edges.node.status === "COMPLETED" &&
-                latestCommit.checkSuites.edges.node.conclusion === "SUCCESS";
+            const isAllRequiredCheckPassed = latestCommit.checkSuites.edges[0].node.status === "COMPLETED" &&
+                latestCommit.checkSuites.edges[0].node.conclusion === "SUCCESS";
             // const isAllRequiredCheckPassed = requiredCheckNames.every((checkName) => {
             //   if (!checkName.includes("ci/circleci")) {
             //     // TODO: Support GitHub Action. Can't get `statusCheckRollup` to work in GitHub API Explorer for some reason.
@@ -446,12 +442,8 @@ function fetchData(owner, repo) {
                                   edges {
                                     node {
                                       name
-                                      startedAt
-                                      completedAt
                                       status
                                       conclusion
-                                      detailsUrl
-                                      url
                                     }
                                   }
                                 }

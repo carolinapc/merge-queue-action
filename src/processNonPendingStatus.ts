@@ -41,9 +41,6 @@ export async function processNonPendingStatus(
   core.info("commit: " + commit)
   core.info("checkSuites: " + latestCommit.checkSuites)
   console.log(latestCommit.checkSuites)
-  console.log(latestCommit?.checkSuites?.edges)
-  console.log(latestCommit?.checkSuites?.edges?.node.status)
-  console.log(latestCommit?.checkSuites?.edges?.node?.status)
 
   // if (commit.node_id !== latestCommit.id) {
   //   // Commit that trigger this hook is not the latest commit of the merging PR
@@ -60,8 +57,8 @@ export async function processNonPendingStatus(
 
   if (state === "success") {
     const isAllRequiredCheckPassed =
-      latestCommit.checkSuites.edges.node.status === "COMPLETED" &&
-      latestCommit.checkSuites.edges.node.conclusion === "SUCCESS"
+      latestCommit.checkSuites.edges[0].node.status === "COMPLETED" &&
+      latestCommit.checkSuites.edges[0].node.conclusion === "SUCCESS"
     // const isAllRequiredCheckPassed = requiredCheckNames.every((checkName) => {
     //   if (!checkName.includes("ci/circleci")) {
     //     // TODO: Support GitHub Action. Can't get `statusCheckRollup` to work in GitHub API Explorer for some reason.
@@ -147,7 +144,7 @@ async function fetchData(
                         status: string
                         conclusion: string
                       }
-                    }
+                    }[]
                   }
                   status: {
                     contexts: {
@@ -206,12 +203,8 @@ async function fetchData(
                                   edges {
                                     node {
                                       name
-                                      startedAt
-                                      completedAt
                                       status
                                       conclusion
-                                      detailsUrl
-                                      url
                                     }
                                   }
                                 }
