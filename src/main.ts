@@ -22,6 +22,7 @@ const eventPayload: WebhookEvent = JSON.parse(
 )
 
 async function run(): Promise<void> {
+  core.info("Start process...")
   try {
     if (eventName === "pull_request") {
       await processPullRequestEvent(eventPayload as PullRequestEvent)
