@@ -53,7 +53,7 @@ export async function processNonPendingStatus(
   if (state === "success") {
     const isAllRequiredCheckPassed =
       latestCommit.checkSuites.edges.node.status === "COMPLETED" &&
-      latestCommit.checkSuites.edges.node.conclusion === "SUCESS"
+      latestCommit.checkSuites.edges.node.conclusion === "SUCCESS"
     // const isAllRequiredCheckPassed = requiredCheckNames.every((checkName) => {
     //   if (!checkName.includes("ci/circleci")) {
     //     // TODO: Support GitHub Action. Can't get `statusCheckRollup` to work in GitHub API Explorer for some reason.
