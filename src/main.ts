@@ -8,6 +8,7 @@ import {
   PullRequestEvent,
   StatusEvent,
   WebhookEvent,
+  WorkflowRunCompletedEvent,
 } from "@octokit/webhooks-definitions/schema"
 
 if (!process.env.GITHUB_EVENT_PATH) {
@@ -26,6 +27,8 @@ async function run(): Promise<void> {
       await processPullRequestEvent(eventPayload as PullRequestEvent)
     } else if (eventName === "status") {
       await processStatusEvent(eventPayload as StatusEvent)
+    } else if (eventName === "workflow_run") {
+      await processStatusEvent(eventPayload as WorkflowRunCompletedEvent)
     } else {
       core.info(`Event does not need to be processed: ${eventName}`)
     }
@@ -61,6 +64,18 @@ async function processStatusEvent(statusEvent: StatusEvent): Promise<void> {
     statusEvent.commit,
     statusEvent.context,
     statusEvent.state
+  )
+  core.info("Finish process status event")
+}
+
+async function processWorkflowRunCompletedEvent(
+  statusEvent: WorkflowRunCompletedEvent
+): Promise<void> {
+  await processNonPendingStatus(
+    statusEvent.repository,
+    statusEvent.workflow_run,
+    "garden-build / deploy",
+    "success"
   )
   core.info("Finish process status event")
 }
