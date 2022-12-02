@@ -51,17 +51,20 @@ export async function processNonPendingStatus(
   const requiredCheckNames = baseBranchRule.requiredStatusCheckContexts
 
   if (state === "success") {
-    const isAllRequiredCheckPassed = requiredCheckNames.every((checkName) => {
-      if (!checkName.includes("ci/circleci")) {
-        // TODO: Support GitHub Action. Can't get `statusCheckRollup` to work in GitHub API Explorer for some reason.
-        return true
-      }
-      return latestCommit.status.contexts.find(
-        (latestCommitContext) =>
-          latestCommitContext.context === checkName &&
-          latestCommitContext.state === "SUCCESS"
-      )
-    })
+    const isAllRequiredCheckPassed =
+      latestCommit.checkSuites.edges.node.status === "COMPLETED" &&
+      latestCommit.checkSuites.edges.node.conclusion === "SUCESS"
+    // const isAllRequiredCheckPassed = requiredCheckNames.every((checkName) => {
+    //   if (!checkName.includes("ci/circleci")) {
+    //     // TODO: Support GitHub Action. Can't get `statusCheckRollup` to work in GitHub API Explorer for some reason.
+    //     return latestCommit.checkSuites.edges.node.status === "COMPLETED" && latestCommit.checkSuites.edges.node.conclusion === "SUCESS"
+    //   }
+    //   return latestCommit.status.contexts.find(
+    //     (latestCommitContext) =>
+    //       latestCommitContext.context === checkName &&
+    //       latestCommitContext.state === "SUCCESS"
+    //   )
+    // })
     if (!isAllRequiredCheckPassed) {
       // Some required check is still pending
       return
@@ -124,6 +127,20 @@ async function fetchData(
                 id: string
                 commit: {
                   id: string
+                  checkSuites: {
+                    edges: {
+                      node: {
+                        app: {
+                          name: string
+                        }
+                        commit: {
+                          oid: string
+                        }
+                        status: string
+                        conclusion: string
+                      }
+                    }
+                  }
                   status: {
                     contexts: {
                       context: string
@@ -166,6 +183,33 @@ async function fetchData(
                    commits(last: 1) {
                      nodes {
                        commit {
+                          checkSuites(last:1) {
+                            edges {
+                              node {
+                                app {
+                                  name
+                                }
+                                commit {
+                                  oid
+                                }
+                                status
+                                conclusion
+                                checkRuns(last:10) {
+                                  edges {
+                                    node {
+                                      name
+                                      startedAt
+                                      completedAt
+                                      status
+                                      conclusion
+                                      detailsUrl
+                                      url
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }                        
                          id
                          status {
                            contexts {
@@ -182,6 +226,49 @@ async function fetchData(
            }
          }
        }`,
+    // return graphqlClient(
+    //   `query allLabels($owner: String!, $repo: String!) {
+    //        repository(owner:$owner, name:$repo) {
+    //          branchProtectionRules(last: 10) {
+    //            nodes {
+    //              pattern
+    //              requiredStatusCheckContexts
+    //            }
+    //          }
+    //          labels(last: 50) {
+    //            nodes {
+    //              id
+    //              name
+    //              pullRequests(first: 20) {
+    //                nodes {
+    //                  id
+    //                  number
+    //                  title
+    //                  baseRef {
+    //                    name
+    //                  }
+    //                  headRef {
+    //                    name
+    //                  }
+    //                  commits(last: 1) {
+    //                    nodes {
+    //                      commit {
+    //                        id
+    //                        status {
+    //                          contexts {
+    //                            context
+    //                            state
+    //                          }
+    //                        }
+    //                      }
+    //                    }
+    //                  }
+    //                }
+    //              }
+    //            }
+    //          }
+    //        }
+    //      }`,
     { owner, repo }
   )
 }
