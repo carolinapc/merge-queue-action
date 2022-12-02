@@ -29,7 +29,9 @@ async function run(): Promise<void> {
     } else if (eventName === "status") {
       await processStatusEvent(eventPayload as StatusEvent)
     } else if (eventName === "workflow_run") {
-      await processStatusEvent(eventPayload as WorkflowRunCompletedEvent)
+      await processWorkflowRunCompletedEvent(
+        eventPayload as WorkflowRunCompletedEvent
+      )
     } else {
       core.info(`Event does not need to be processed: ${eventName}`)
     }
