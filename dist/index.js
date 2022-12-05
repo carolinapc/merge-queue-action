@@ -358,8 +358,8 @@ function processNonPendingStatus(repo, commit, context, state) {
             const isAllRequiredCheckPassed = requiredCheckNames.every((checkName) => {
                 core.info(`Context to check: ${checkName}`);
                 if (!checkName.includes("ci/circleci")) {
-                    return latestCommit.checkSuites.edges[0].node.status === "COMPLETED"
-                        && latestCommit.checkSuites.edges[0].node.conclusion === "SUCESS";
+                    return (latestCommit.checkSuites.edges[0].node.status === "COMPLETED" &&
+                        latestCommit.checkSuites.edges[0].node.conclusion === "SUCCESS");
                 }
                 return latestCommit.status.contexts.find((latestCommitContext) => latestCommitContext.context === checkName &&
                     latestCommitContext.state === "SUCCESS");

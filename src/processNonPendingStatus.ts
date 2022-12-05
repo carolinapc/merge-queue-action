@@ -61,7 +61,7 @@ export async function processNonPendingStatus(
       if (!checkName.includes("ci/circleci")) {
         return (
           latestCommit.checkSuites.edges[0].node.status === "COMPLETED" &&
-          latestCommit.checkSuites.edges[0].node.conclusion === "SUCESS"
+          latestCommit.checkSuites.edges[0].node.conclusion === "SUCCESS"
         )
       }
       return latestCommit.status.contexts.find(
