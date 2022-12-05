@@ -96,6 +96,7 @@ const eventPayload = JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH).t
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         core.info("Start process...");
+        core.info(`Event triggered: ${eventName}`);
         try {
             if (eventName === "pull_request") {
                 yield processPullRequestEvent(eventPayload);
