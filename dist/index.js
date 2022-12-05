@@ -133,23 +133,16 @@ function processStatusEvent(statusEvent) {
             return;
         }
         yield processNonPendingStatus_1.processNonPendingStatus(statusEvent.repository, statusEvent.commit, statusEvent.context, statusEvent.state);
-        core.info(`repository: ${statusEvent.repository}`);
-        core.info(`commit: ${statusEvent.commit}`);
-        core.info(`context: ${statusEvent.context}`);
-        core.info(`state: ${statusEvent.state}`);
-        core.info(`statusEvent.name: ${statusEvent.name}`);
         core.info("Finish process status event");
     });
 }
 function processWorkflowRunCompletedEvent(statusEvent) {
     return __awaiter(this, void 0, void 0, function* () {
-        yield processNonPendingStatus_1.processNonPendingStatus(statusEvent.repository, statusEvent.workflow_run, statusEvent.workflow.name, 
-        //    "garden-build / deploy",
-        "success");
-        core.info(`repository: ${statusEvent.repository}`);
-        core.info(`workflow_run: ${statusEvent.workflow_run}`);
-        core.info(`statusEvent.workflow.name: ${statusEvent.workflow.name}`);
-        core.info("Finish process workflow_run event");
+        if (statusEvent.workflow_run.conclusion !== "success") {
+            return;
+        }
+        yield processNonPendingStatus_1.processNonPendingStatus(statusEvent.repository, { node_id: "" }, statusEvent.workflow.name, statusEvent.workflow_run.conclusion);
+        core.info(`Finish process workflow_run event: ${statusEvent.workflow.name}`);
     });
 }
 
@@ -348,14 +341,13 @@ function processNonPendingStatus(repo, commit, context, state) {
         }
         const mergingPr = mergingLabel.pullRequests.nodes[0];
         const latestCommit = mergingPr.commits.nodes[0].commit;
-        core.info("latestCommit.id: " + latestCommit.id);
-        core.info("commit: " + commit);
-        core.info("checkSuites: " + latestCommit.checkSuites);
-        console.log(latestCommit);
-        // if (commit.node_id !== latestCommit.id) {
-        //   // Commit that trigger this hook is not the latest commit of the merging PR
-        //   return
-        // }
+        core.info(`latestCommit.id: ${latestCommit.id}`);
+        core.info(`commit.node_id: ${commit.node_id}`);
+        // only checks commit if it is not empty (to be ignored by workflow_run event)
+        if (commit.node_id !== "" && commit.node_id !== latestCommit.id) {
+            // Commit that trigger this hook is not the latest commit of the merging PR
+            return;
+        }
         const baseBranchRule = branchProtectionRules.nodes.find((rule) => rule.pattern === mergingPr.baseRef.name);
         if (!baseBranchRule) {
             // TODO: No protection rule for merging this PR. Merge immediately?
@@ -363,21 +355,17 @@ function processNonPendingStatus(repo, commit, context, state) {
         }
         const requiredCheckNames = baseBranchRule.requiredStatusCheckContexts;
         if (state === "success") {
-            const isAllRequiredCheckPassed = latestCommit.checkSuites.edges[0].node.status === "COMPLETED" &&
-                latestCommit.checkSuites.edges[0].node.conclusion === "SUCCESS";
-            // const isAllRequiredCheckPassed = requiredCheckNames.every((checkName) => {
-            //   if (!checkName.includes("ci/circleci")) {
-            //     // TODO: Support GitHub Action. Can't get `statusCheckRollup` to work in GitHub API Explorer for some reason.
-            //     return latestCommit.checkSuites.edges.node.status === "COMPLETED" && latestCommit.checkSuites.edges.node.conclusion === "SUCESS"
-            //   }
-            //   return latestCommit.status.contexts.find(
-            //     (latestCommitContext) =>
-            //       latestCommitContext.context === checkName &&
-            //       latestCommitContext.state === "SUCCESS"
-            //   )
-            // })
+            const isAllRequiredCheckPassed = requiredCheckNames.every((checkName) => {
+                core.info(`Context to check: ${checkName}`);
+                if (!checkName.includes("ci/circleci")) {
+                    return latestCommit.checkSuites.edges[0].node.status === "COMPLETED"
+                        && latestCommit.checkSuites.edges[0].node.conclusion === "SUCESS";
+                }
+                return latestCommit.status.contexts.find((latestCommitContext) => latestCommitContext.context === checkName &&
+                    latestCommitContext.state === "SUCCESS");
+            });
             if (!isAllRequiredCheckPassed) {
-                // Some required check is still pending
+                core.info(`Some required check is still pending`);
                 return;
             }
             core.info("##### ALL CHECK PASS");

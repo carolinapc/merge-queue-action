@@ -37,15 +37,15 @@ export async function processNonPendingStatus(
 
   const mergingPr = mergingLabel.pullRequests.nodes[0]
   const latestCommit = mergingPr.commits.nodes[0].commit
-  core.info("latestCommit.id: " + latestCommit.id)
-  core.info("commit: " + commit)
-  core.info("checkSuites: " + latestCommit.checkSuites)
-  console.log(latestCommit)
+  core.info(`latestCommit.id: ${latestCommit.id}`)
+  core.info(`commit.node_id: ${commit.node_id}`)
 
-  // if (commit.node_id !== latestCommit.id) {
-  //   // Commit that trigger this hook is not the latest commit of the merging PR
-  //   return
-  // }
+  // only checks commit if it is not empty (to be ignored by workflow_run event)
+  if (commit.node_id !== "" && commit.node_id !== latestCommit.id) {
+    // Commit that trigger this hook is not the latest commit of the merging PR
+    return
+  }
+
   const baseBranchRule = branchProtectionRules.nodes.find(
     (rule) => rule.pattern === mergingPr.baseRef.name
   )
@@ -56,22 +56,22 @@ export async function processNonPendingStatus(
   const requiredCheckNames = baseBranchRule.requiredStatusCheckContexts
 
   if (state === "success") {
-    const isAllRequiredCheckPassed =
-      latestCommit.checkSuites.edges[0].node.status === "COMPLETED" &&
-      latestCommit.checkSuites.edges[0].node.conclusion === "SUCCESS"
-    // const isAllRequiredCheckPassed = requiredCheckNames.every((checkName) => {
-    //   if (!checkName.includes("ci/circleci")) {
-    //     // TODO: Support GitHub Action. Can't get `statusCheckRollup` to work in GitHub API Explorer for some reason.
-    //     return latestCommit.checkSuites.edges.node.status === "COMPLETED" && latestCommit.checkSuites.edges.node.conclusion === "SUCESS"
-    //   }
-    //   return latestCommit.status.contexts.find(
-    //     (latestCommitContext) =>
-    //       latestCommitContext.context === checkName &&
-    //       latestCommitContext.state === "SUCCESS"
-    //   )
-    // })
+    const isAllRequiredCheckPassed = requiredCheckNames.every((checkName) => {
+      core.info(`Context to check: ${checkName}`)
+      if (!checkName.includes("ci/circleci")) {
+        return (
+          latestCommit.checkSuites.edges[0].node.status === "COMPLETED" &&
+          latestCommit.checkSuites.edges[0].node.conclusion === "SUCESS"
+        )
+      }
+      return latestCommit.status.contexts.find(
+        (latestCommitContext) =>
+          latestCommitContext.context === checkName &&
+          latestCommitContext.state === "SUCCESS"
+      )
+    })
     if (!isAllRequiredCheckPassed) {
-      // Some required check is still pending
+      core.info(`Some required check is still pending`)
       return
     }
 

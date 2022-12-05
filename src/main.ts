@@ -69,26 +69,20 @@ async function processStatusEvent(statusEvent: StatusEvent): Promise<void> {
     statusEvent.context,
     statusEvent.state
   )
-  core.info(`repository: ${statusEvent.repository}`)
-  core.info(`commit: ${statusEvent.commit}`)
-  core.info(`context: ${statusEvent.context}`)
-  core.info(`state: ${statusEvent.state}`)
-  core.info(`statusEvent.name: ${statusEvent.name}`)
   core.info("Finish process status event")
 }
 
 async function processWorkflowRunCompletedEvent(
   statusEvent: WorkflowRunCompletedEvent
 ): Promise<void> {
+  if (statusEvent.workflow_run.conclusion !== "success") {
+    return
+  }
   await processNonPendingStatus(
     statusEvent.repository,
-    statusEvent.workflow_run,
+    { node_id: "" },
     statusEvent.workflow.name,
-    //    "garden-build / deploy",
-    "success"
+    statusEvent.workflow_run.conclusion
   )
-  core.info(`repository: ${statusEvent.repository}`)
-  core.info(`workflow_run: ${statusEvent.workflow_run}`)
-  core.info(`statusEvent.workflow.name: ${statusEvent.workflow.name}`)
-  core.info("Finish process workflow_run event")
+  core.info(`Finish process workflow_run event: ${statusEvent.workflow.name}`)
 }
