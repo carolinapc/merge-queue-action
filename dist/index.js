@@ -137,7 +137,9 @@ function processStatusEvent(statusEvent) {
 }
 function processWorkflowRunCompletedEvent(statusEvent) {
     return __awaiter(this, void 0, void 0, function* () {
-        yield processNonPendingStatus_1.processNonPendingStatus(statusEvent.repository, statusEvent.workflow_run, "garden-build / deploy", "success");
+        yield processNonPendingStatus_1.processNonPendingStatus(statusEvent.repository, statusEvent.workflow_run, statusEvent.workflow.name, 
+        //    "garden-build / deploy",
+        "success");
         core.info("Finish process status event");
     });
 }
@@ -340,7 +342,7 @@ function processNonPendingStatus(repo, commit, context, state) {
         core.info("latestCommit.id: " + latestCommit.id);
         core.info("commit: " + commit);
         core.info("checkSuites: " + latestCommit.checkSuites);
-        console.log(latestCommit.checkSuites);
+        console.log(latestCommit);
         // if (commit.node_id !== latestCommit.id) {
         //   // Commit that trigger this hook is not the latest commit of the merging PR
         //   return

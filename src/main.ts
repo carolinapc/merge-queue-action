@@ -77,7 +77,8 @@ async function processWorkflowRunCompletedEvent(
   await processNonPendingStatus(
     statusEvent.repository,
     statusEvent.workflow_run,
-    "garden-build / deploy",
+    statusEvent.workflow.name,
+    //    "garden-build / deploy",
     "success"
   )
   core.info("Finish process status event")
