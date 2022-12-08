@@ -457,7 +457,7 @@ function fetchData(owner, repo) {
                    commits(last: 1) {
                      nodes {
                        commit {
-                          checkSuites(last:50) {
+                          checkSuites(last:10) {
                             edges {
                               node {
                                 app {
@@ -468,7 +468,7 @@ function fetchData(owner, repo) {
                                 }
                                 status
                                 conclusion
-                                checkRuns(last:10) {
+                                checkRuns(last:1) {
                                   edges {
                                     node {
                                       name
