@@ -88,34 +88,37 @@ export async function processNonPendingStatus(
       )
     })
 
-    if (isAllRequiredCheckPassed) {
-      const blockPrCheck = latestCommit.checkSuites.edges.find((edges) => {
-        return edges.node.checkRuns.edges.find(
-          (checkRun) => checkRun.node.name === "block-pr-merge"
-        )
-      })
-      if (
-        blockPrCheck &&
-        blockPrCheck?.node.status === "COMPLETED" &&
-        blockPrCheck?.node.conclusion === "FAILURE"
-      ) {
-        //add label to unblock the merge
-        // if(unblockPrMergeLabel){
-        //   await addLabel(unblockPrMergeLabel, mergingPr.id )
-        // }
-        return
-      }
-
-      core.info("##### ALL CHECK PASS")
-      try {
-        await mergePr(mergingPr, repo.node_id)
-        // TODO: Delete head branch of that PR (maybe)(might not if merge unsuccessful)
-      } catch (error) {
-        core.info("Unable to merge the PR.")
-        core.error(error)
-      }
-    } else {
+    if (!isAllRequiredCheckPassed) {
       core.info(`Some required check is still pending`)
+      return
+    }
+
+    // if (isAllRequiredCheckPassed) {
+    //   const blockPrCheck = latestCommit.checkSuites.edges.find((edges) => {
+    //     return edges.node.checkRuns.edges.find(
+    //       (checkRun) => checkRun.node.name === "block-pr-merge"
+    //     )
+    //   })
+    //   if (
+    //     blockPrCheck &&
+    //     blockPrCheck?.node.status === "COMPLETED" &&
+    //     blockPrCheck?.node.conclusion === "FAILURE"
+    //   ) {
+    //     //add label to unblock the merge
+    //     // if(unblockPrMergeLabel){
+    //     //   await addLabel(unblockPrMergeLabel, mergingPr.id )
+    //     // }
+    //     return
+    //   }
+    // }
+
+    core.info("##### ALL CHECK PASS")
+    try {
+      await mergePr(mergingPr, repo.node_id)
+      // TODO: Delete head branch of that PR (maybe)(might not if merge unsuccessful)
+    } catch (error) {
+      core.info("Unable to merge the PR.")
+      core.error(error)
     }
   } else {
     if (!requiredCheckNames.includes(context)) {

@@ -30,7 +30,7 @@ const BotLabel = {
     CommandQueueForMerging: "command:queue-for-merging",
     BotMerging: "bot:merging",
     BotQueued: "bot:queued",
-    BotUnblockPrMerge: "bot:unblock-pr-merge"
+    BotUnblockPrMerge: "bot:unblock-pr-merge",
 };
 function isCommandQueueForMergingLabel(label) {
     return label.name === BotLabel.CommandQueueForMerging;
@@ -368,8 +368,8 @@ function processNonPendingStatus(repo, commit, context, state) {
                     return true;
                 if (!checkName.includes("ci/circleci")) {
                     // get the checkSuite related to the checkName to verify the status
-                    const checkSuite = latestCommit.checkSuites.edges.find(edges => {
-                        return edges.node.checkRuns.edges.find(checkRun => checkName.includes(checkRun.node.name));
+                    const checkSuite = latestCommit.checkSuites.edges.find((edges) => {
+                        return edges.node.checkRuns.edges.find((checkRun) => checkName.includes(checkRun.node.name));
                     });
                     return ((checkSuite === null || checkSuite === void 0 ? void 0 : checkSuite.node.status) === "COMPLETED" &&
                         (checkSuite === null || checkSuite === void 0 ? void 0 : checkSuite.node.conclusion) === "SUCCESS");
@@ -377,29 +377,36 @@ function processNonPendingStatus(repo, commit, context, state) {
                 return latestCommit.status.contexts.find((latestCommitContext) => latestCommitContext.context === checkName &&
                     latestCommitContext.state === "SUCCESS");
             });
-            if (isAllRequiredCheckPassed) {
-                const blockPrCheck = latestCommit.checkSuites.edges.find(edges => {
-                    return edges.node.checkRuns.edges.find(checkRun => checkRun.node.name === "block-pr-merge");
-                });
-                if (blockPrCheck && (blockPrCheck === null || blockPrCheck === void 0 ? void 0 : blockPrCheck.node.status) === "COMPLETED" && (blockPrCheck === null || blockPrCheck === void 0 ? void 0 : blockPrCheck.node.conclusion) === "FAILURE") {
-                    //add label to unblock the merge
-                    // if(unblockPrMergeLabel){
-                    //   await addLabel(unblockPrMergeLabel, mergingPr.id )
-                    // }
-                    return;
-                }
-                core.info("##### ALL CHECK PASS");
-                try {
-                    yield mutations_1.mergePr(mergingPr, repo.node_id);
-                    // TODO: Delete head branch of that PR (maybe)(might not if merge unsuccessful)
-                }
-                catch (error) {
-                    core.info("Unable to merge the PR.");
-                    core.error(error);
-                }
-            }
-            else {
+            if (!isAllRequiredCheckPassed) {
                 core.info(`Some required check is still pending`);
+                return;
+            }
+            // if (isAllRequiredCheckPassed) {
+            //   const blockPrCheck = latestCommit.checkSuites.edges.find((edges) => {
+            //     return edges.node.checkRuns.edges.find(
+            //       (checkRun) => checkRun.node.name === "block-pr-merge"
+            //     )
+            //   })
+            //   if (
+            //     blockPrCheck &&
+            //     blockPrCheck?.node.status === "COMPLETED" &&
+            //     blockPrCheck?.node.conclusion === "FAILURE"
+            //   ) {
+            //     //add label to unblock the merge
+            //     // if(unblockPrMergeLabel){
+            //     //   await addLabel(unblockPrMergeLabel, mergingPr.id )
+            //     // }
+            //     return
+            //   }
+            // }
+            core.info("##### ALL CHECK PASS");
+            try {
+                yield mutations_1.mergePr(mergingPr, repo.node_id);
+                // TODO: Delete head branch of that PR (maybe)(might not if merge unsuccessful)
+            }
+            catch (error) {
+                core.info("Unable to merge the PR.");
+                core.error(error);
             }
         }
         else {
