@@ -144,7 +144,7 @@ function processStatusEvent(statusEvent) {
 }
 function processWorkflowRunCompletedEvent(statusEvent) {
     return __awaiter(this, void 0, void 0, function* () {
-        if (statusEvent.workflow_run.conclusion !== "success") {
+        if (statusEvent.workflow_run.conclusion !== "success" && statusEvent.workflow_run.conclusion !== "failure") {
             core.info(`Workflow ${statusEvent.workflow.name} had this conclusion: ${statusEvent.workflow_run.conclusion}`);
             return;
         }

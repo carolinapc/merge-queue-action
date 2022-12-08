@@ -78,7 +78,10 @@ async function processStatusEvent(statusEvent: StatusEvent): Promise<void> {
 async function processWorkflowRunCompletedEvent(
   statusEvent: WorkflowRunCompletedEvent
 ): Promise<void> {
-  if (statusEvent.workflow_run.conclusion !== "success") {
+  if (
+    statusEvent.workflow_run.conclusion !== "success" &&
+    statusEvent.workflow_run.conclusion !== "failure"
+  ) {
     core.info(
       `Workflow ${statusEvent.workflow.name} had this conclusion: ${statusEvent.workflow_run.conclusion}`
     )
