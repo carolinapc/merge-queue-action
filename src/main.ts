@@ -76,6 +76,9 @@ async function processWorkflowRunCompletedEvent(
   statusEvent: WorkflowRunCompletedEvent
 ): Promise<void> {
   if (statusEvent.workflow_run.conclusion !== "success") {
+    core.info(
+      `Workflow ${statusEvent.workflow.name} had this conclusion: ${statusEvent.workflow_run.conclusion}`
+    )
     return
   }
   await processNonPendingStatus(

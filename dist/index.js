@@ -144,6 +144,7 @@ function processStatusEvent(statusEvent) {
 function processWorkflowRunCompletedEvent(statusEvent) {
     return __awaiter(this, void 0, void 0, function* () {
         if (statusEvent.workflow_run.conclusion !== "success") {
+            core.info(`Workflow ${statusEvent.workflow.name} had this conclusion: ${statusEvent.workflow_run.conclusion}`);
             return;
         }
         yield processNonPendingStatus_1.processNonPendingStatus(statusEvent.repository, { node_id: "" }, statusEvent.workflow.name, statusEvent.workflow_run.conclusion);
