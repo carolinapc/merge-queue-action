@@ -50,6 +50,9 @@ async function processPullRequestEvent(
     pullRequestEvent.action !== "labeled" ||
     !isCommandQueueForMergingLabel(pullRequestEvent.label)
   ) {
+    core.info(
+      "PR event not labeled or there's no command:queue-for-merging label"
+    )
     return
   }
   await processQueueForMergingCommand(

@@ -126,6 +126,7 @@ function processPullRequestEvent(pullRequestEvent) {
     return __awaiter(this, void 0, void 0, function* () {
         if (pullRequestEvent.action !== "labeled" ||
             !labels_1.isCommandQueueForMergingLabel(pullRequestEvent.label)) {
+            core.info("PR event not labeled or there's no command:queue-for-merging label");
             return;
         }
         yield processQueueForMergingCommand_1.processQueueForMergingCommand(pullRequestEvent.pull_request, pullRequestEvent.repository);
