@@ -216,7 +216,7 @@ async function fetchData(
                requiredStatusCheckContexts
              }
            }
-           labels(last: 50) {
+           labels(last: 30) {
              nodes {
                id
                name
@@ -234,7 +234,7 @@ async function fetchData(
                    commits(last: 1) {
                      nodes {
                        commit {
-                          checkSuites(last:10) {
+                          checkSuites(last:5) {
                             edges {
                               node {
                                 app {
