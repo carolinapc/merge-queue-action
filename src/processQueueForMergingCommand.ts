@@ -91,6 +91,8 @@ export async function processQueueForMergingCommand(
       } catch (mergePrError) {
         core.info("Unable to merge the PR")
         core.error(mergePrError)
+        // return cause it could still have checks processing
+        return
       }
     }
     stopMergingCurrentPrAndProcessNextPrInQueue(
