@@ -234,7 +234,7 @@ async function fetchData(
                    commits(last: 1) {
                      nodes {
                        commit {
-                          checkSuites(last:5) {
+                          checkSuites(last:1) {
                             edges {
                               node {
                                 app {

@@ -144,7 +144,8 @@ function processStatusEvent(statusEvent) {
 }
 function processWorkflowRunCompletedEvent(statusEvent) {
     return __awaiter(this, void 0, void 0, function* () {
-        if (statusEvent.workflow_run.conclusion !== "success" && statusEvent.workflow_run.conclusion !== "failure") {
+        if (statusEvent.workflow_run.conclusion !== "success" &&
+            statusEvent.workflow_run.conclusion !== "failure") {
             core.info(`Workflow ${statusEvent.workflow.name} had this conclusion: ${statusEvent.workflow_run.conclusion}`);
             return;
         }
@@ -459,7 +460,7 @@ function fetchData(owner, repo) {
                    commits(last: 1) {
                      nodes {
                        commit {
-                          checkSuites(last:5) {
+                          checkSuites(last:1) {
                             edges {
                               node {
                                 app {
