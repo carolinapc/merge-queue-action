@@ -25,12 +25,11 @@ exports.graphqlClient = graphql_1.graphql.defaults({
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.isBotUnblockPrMergeLabel = exports.isBotQueuedLabel = exports.isBotMergingLabel = exports.isCommandQueueForMergingLabel = void 0;
+exports.isBotQueuedLabel = exports.isBotMergingLabel = exports.isCommandQueueForMergingLabel = void 0;
 const BotLabel = {
     CommandQueueForMerging: "command:queue-for-merging",
     BotMerging: "bot:merging",
-    BotQueued: "bot:queued",
-    BotUnblockPrMerge: "bot:unblock-pr-merge",
+    BotQueued: "bot:queued"
 };
 function isCommandQueueForMergingLabel(label) {
     return label.name === BotLabel.CommandQueueForMerging;
@@ -44,10 +43,6 @@ function isBotQueuedLabel(label) {
     return label.name === BotLabel.BotQueued;
 }
 exports.isBotQueuedLabel = isBotQueuedLabel;
-function isBotUnblockPrMergeLabel(label) {
-    return label.name === BotLabel.BotUnblockPrMerge;
-}
-exports.isBotUnblockPrMergeLabel = isBotUnblockPrMergeLabel;
 
 
 /***/ }),
@@ -343,7 +338,6 @@ function processNonPendingStatus(repo, commit, context, state) {
     return __awaiter(this, void 0, void 0, function* () {
         const { repository: { branchProtectionRules, labels: { nodes: labelNodes }, }, } = yield fetchData(repo.owner.login, repo.name);
         const mergingLabel = labelNodes.find(labels_1.isBotMergingLabel);
-        //const unblockPrMergeLabel = labelNodes.find(isBotUnblockPrMergeLabel)
         if (!mergingLabel || mergingLabel.pullRequests.nodes.length === 0) {
             // No merging PR to process
             return;
@@ -384,24 +378,6 @@ function processNonPendingStatus(repo, commit, context, state) {
                 core.info(`Some required check is still pending`);
                 return;
             }
-            // if (isAllRequiredCheckPassed) {
-            //   const blockPrCheck = latestCommit.checkSuites.edges.find((edges) => {
-            //     return edges.node.checkRuns.edges.find(
-            //       (checkRun) => checkRun.node.name === "block-pr-merge"
-            //     )
-            //   })
-            //   if (
-            //     blockPrCheck &&
-            //     blockPrCheck?.node.status === "COMPLETED" &&
-            //     blockPrCheck?.node.conclusion === "FAILURE"
-            //   ) {
-            //     //add label to unblock the merge
-            //     // if(unblockPrMergeLabel){
-            //     //   await addLabel(unblockPrMergeLabel, mergingPr.id )
-            //     // }
-            //     return
-            //   }
-            // }
             core.info("##### ALL CHECK PASS");
             try {
                 yield mutations_1.mergePr(mergingPr, repo.node_id);
